@@ -7,16 +7,19 @@ import (
 
 	"github.com/osmosis-labs/osmosis/v23/wasmbinding/bindings"
 	tokenfactorykeeper "github.com/osmosis-labs/osmosis/v23/x/tokenfactory/keeper"
+	concentratedliquidity "github.com/osmosis-labs/osmosis/v23/x/concentrated-liquidity"
 )
 
 type QueryPlugin struct {
-	tokenFactoryKeeper *tokenfactorykeeper.Keeper
+	tokenFactoryKeeper          *tokenfactorykeeper.Keeper
+	concentratedLiquidityKeeper *concentratedliquidity.Keeper
 }
 
 // NewQueryPlugin returns a reference to a new QueryPlugin.
-func NewQueryPlugin(tfk *tokenfactorykeeper.Keeper) *QueryPlugin {
+func NewQueryPlugin(tfk *tokenfactorykeeper.Keeper, clk *concentratedliquidity.Keeper) *QueryPlugin {
 	return &QueryPlugin{
-		tokenFactoryKeeper: tfk,
+		tokenFactoryKeeper:          tfk,
+		concentratedLiquidityKeeper: clk,
 	}
 }
 
@@ -28,4 +31,26 @@ func (qp QueryPlugin) GetDenomAdmin(ctx sdk.Context, denom string) (*bindings.De
 	}
 
 	return &bindings.DenomAdminResponse{Admin: metadata.Admin}, nil
+}
+
+func (qp QueryPlugin) GetUserPostitions(ctx sdk.Context, address string, poolId uint64) (*bindings.UserPositionExistsResponse, error) {
+	sdkAddr, err := sdk.AccAddressFromBech32(address)
+	if err != nil {
+		return nil, err
+	}
+
+	positions, err := qp.concentratedLiquidityKeeper.GetUserPositions(ctx, sdkAddr, poolId)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(positions) > 0 {
+		return &bindings.UserPositionExistsResponse{
+			Result: true,
+		}, nil
+	} else {
+		return &bindings.UserPositionExistsResponse{
+			Result: false,
+		}, nil
+	}
 }

@@ -118,6 +118,8 @@ sed -i -E 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $VALIDATOR1
 # sed -i -E 's|version = "v0"|version = "v1"|g' $VALIDATOR1_CONFIG
 sed -i -E 's|prometheus = false|prometheus = true|g' $VALIDATOR1_CONFIG
 
+exit 0
+
 # validator2
 sed -i -E 's|tcp://127.0.0.1:26658|tcp://127.0.0.1:26655|g' $VALIDATOR2_CONFIG
 sed -i -E 's|tcp://127.0.0.1:26657|tcp://127.0.0.1:26654|g' $VALIDATOR2_CONFIG
@@ -154,6 +156,7 @@ sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(osmosisd tendermint 
 sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(osmosisd tendermint show-node-id --home=$HOME/.osmosisd/validator1)@localhost:26656\"|g" $HOME/.osmosisd/validator3/config/config.toml
 sed -i -E "s|persistent_peers = \"\"|persistent_peers = \"$(osmosisd tendermint show-node-id --home=$HOME/.osmosisd/validator1)@localhost:26656\"|g" $HOME/.osmosisd/validator4/config/config.toml
 
+
 # start all three validators
 tmux new -s validator1 -d osmosisd start --home=$HOME/.osmosisd/validator1
 tmux new -s validator2 -d osmosisd start --home=$HOME/.osmosisd/validator2
@@ -162,8 +165,8 @@ tmux new -s validator4 -d osmosisd start --home=$HOME/.osmosisd/validator4
 
 
 # send uosmo from first validator to second validator
-echo "Waiting 7 seconds to send funds to validators 2, 3, and 4..."
-sleep 7
+echo "Waiting 15 seconds to send funds to validators 2, 3, and 4..."
+sleep 15
 osmosisd tx bank send validator1 $(osmosisd keys show validator2 -a --keyring-backend=test --home=$HOME/.osmosisd/validator2) 500000000uosmo,50000000000stake --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
 osmosisd tx bank send validator1 $(osmosisd keys show validator3 -a --keyring-backend=test --home=$HOME/.osmosisd/validator3) 400000000uosmo,500000000stake --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake
 osmosisd tx bank send validator1 $(osmosisd keys show validator4 -a --keyring-backend=test --home=$HOME/.osmosisd/validator4) 400000000uosmo,500000000stake --keyring-backend=test --home=$HOME/.osmosisd/validator1 --chain-id=testing --broadcast-mode block --node http://localhost:26657 --yes --fees 1000000stake

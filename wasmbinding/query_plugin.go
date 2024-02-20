@@ -94,6 +94,18 @@ func CustomQuerier(qp *QueryPlugin) func(ctx sdk.Context, request json.RawMessag
 
 			return bz, nil
 
+		case contractQuery.UserPositionExists != nil:
+			res, err := qp.GetUserPostitions(ctx, contractQuery.UserPositionExists.Address, contractQuery.UserPositionExists.PoolId)
+			if err != nil {
+				return nil, err
+			}
+
+			bz, err := json.Marshal(res)
+			if err != nil {
+				return nil, fmt.Errorf("failed to JSON marshal UserPostitionExistsResponse response: %w", err)
+			}
+
+			return bz, nil
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "unknown osmosis query variant"}
 		}

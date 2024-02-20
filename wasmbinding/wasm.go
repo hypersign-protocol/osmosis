@@ -8,13 +8,15 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	tokenfactorykeeper "github.com/osmosis-labs/osmosis/v23/x/tokenfactory/keeper"
+	concentratedliquidity "github.com/osmosis-labs/osmosis/v23/x/concentrated-liquidity"
 )
 
 func RegisterCustomPlugins(
 	bank *bankkeeper.BaseKeeper,
 	tokenFactory *tokenfactorykeeper.Keeper,
+	concentratedLiquidity *concentratedliquidity.Keeper,
 ) []wasmkeeper.Option {
-	wasmQueryPlugin := NewQueryPlugin(tokenFactory)
+	wasmQueryPlugin := NewQueryPlugin(tokenFactory, concentratedLiquidity)
 
 	queryPluginOpt := wasmkeeper.WithQueryPlugins(&wasmkeeper.QueryPlugins{
 		Custom: CustomQuerier(wasmQueryPlugin),
